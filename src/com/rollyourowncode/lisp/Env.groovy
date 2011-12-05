@@ -8,13 +8,22 @@ class Env extends HashMap {
     Env(List keys, List values, Env outer = null) {
         assert keys.size() == values.size()
         this.outer = outer
-        for ( int i = 0; i < keys.size(); i++ ) {
+        for (int i = 0; i < keys.size(); i++) {
             put(keys[i], values[i])
         }
     }
 
     def find(var) {
-        if ( containsKey(var) ) {
+        try {
+            return tryToFind(var)
+        } catch ( NullPointerException npe ) {
+            println "Cannot find variable " + var
+        }
+
+    }
+
+    def tryToFind(var) {
+        if (containsKey(var)) {
             return this
         } else {
             return outer.find(var)

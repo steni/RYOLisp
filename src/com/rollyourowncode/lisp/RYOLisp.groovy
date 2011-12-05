@@ -35,6 +35,12 @@ public class RYOLisp {
             return x;
         } else if (x[0] == "set!") {
             setVariable(x, env)
+        } else if (x[0] == "quote") {
+            def (_, exp) = x
+            return exp
+        } else if (x[0] == "if") {
+            def (_, test, conseq, alt) = x
+            return evaluate( evaluate(test, env) ? conseq : alt , env)
         } else {
             return runProcedure(x, env)
         }
@@ -61,6 +67,8 @@ public class RYOLisp {
     def addGlobals(Env env) {
         env.put("+", { a, b -> a + b })
         env.put("-", { a, b -> a - b })
+        env.put(">", { a, b -> a > b ? 1 : 0})
+        env.put("<", { a, b -> a < b ? 1 : 0})
         return env
     }
 

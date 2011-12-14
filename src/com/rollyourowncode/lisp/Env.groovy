@@ -13,6 +13,12 @@ class Env extends HashMap {
         }
     }
 
+    Env(key, value, Env outer = null) {
+        println "new Env(), key: " + key + ", value: " + value
+        this.outer = outer
+        put(key.get(0), value)
+    }
+
     def find(var) {
         try {
             return tryToFind(var)

@@ -7,8 +7,9 @@ import org.junit.Test
 import org.junit.Before
 import org.junit.Ignore
 import static org.junit.Assert.assertTrue
+import org.junit.rules.ExpectedException
 
-class RYOLispTest {
+public class RYOLispTest {
     RYOLisp ryoLisp;
 
     @Before
@@ -93,8 +94,8 @@ class RYOLispTest {
         assertThat(ryoLisp.evaluate(1), is(1))
     }
 
-    @Test
-    void evalAssignsValueOnSetThatIsStoredInTheEnvironment() {
+    @Test(expected = NullPointerException.class)
+    void setFailsWithoutPrecedingDefine() {
         def x = ['set!', 'a', 2]
         ryoLisp.evaluate(x)
         Map env = ryoLisp.outerEnv.find('a')
@@ -103,8 +104,19 @@ class RYOLispTest {
     }
 
     @Test
+    void evalAssignsValueOnSetThatIsStoredInTheEnvironment() {
+        def define = ['define', 'a', 3]
+        ryoLisp.evaluate(define)
+        def set = ['set!', 'a', 2]
+        ryoLisp.evaluate(set)
+        Map env = ryoLisp.outerEnv.find('a')
+        def value = env.get('a')
+        assertThat(value, is(2))
+    }
+
+    @Test
     void evalCanBringOutStoredVariableValues() {
-        def x = ['set!', 'a', 2]
+        def x = ['define', 'a', 2]
         ryoLisp.evaluate(x)
         assertThat(ryoLisp.evaluate('a'), is(2))
 
@@ -143,10 +155,63 @@ class RYOLispTest {
 
     @Test
     void branchingWithIf() {
+        String program1 = "(if 1 (quote true) (quote false))"
+        String program2 = "(if 0 (quote true) (quote false))"
+        assertThat(ryoLisp.repl(program1), is("true"))
+        assertThat(ryoLisp.repl(program2), is("false"))
+    }
+
+    @Test
+    void branchingWithIfEvaluatesTest() {
         String program1 = "(if (> 2 1) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))"
         String program2 = "(if (> 1 2) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))"
         assertThat(ryoLisp.repl(program1), is("2isbiggerthan1"))
-        assertThat( ryoLisp.repl(program2), is("2isnotbiggerthanone"))
+        assertThat(ryoLisp.repl(program2), is("2isnotbiggerthanone"))
+    }
+
+    @Test
+    void defineAVariable() {
+        String program = "(define a 3)"
+        ryoLisp.repl(program)
+        assertThat(ryoLisp.repl("a"), is(3))
+    }
+
+    @Test
+    void defineAVariableEvaluatesExpression() {
+        String program = "(define a (+ 1 3))"
+        ryoLisp.repl(program)
+        assertThat(ryoLisp.repl("a"), is(4))
+    }
+
+    @Test
+    void lambda() {
+        def program = "(lambda (r) (* 3 (* r r)))"
+        Object result = ryoLisp.repl(program)
+        assertThat(result, instanceOf(Closure.class))
+
+        Closure closure = result
+        def number = closure(2)
+        assertThat(number, is(12))
+    }
+
+    @Test
+    void lambdaWithMoreArgs() {
+        def program = "(lambda (a b) (* 3 (* a b)))"
+        Object result = ryoLisp.repl(program)
+        assertThat(result, instanceOf(Closure.class))
+
+        Closure closure = result
+
+        def number = closure(3, 4)
+
+        assertThat(number, is(36))
+    }
+
+    @Test
+    void defineLambda() {
+        def program = "(define area (lambda (r) (* 3 (* r r))))"
+        ryoLisp.repl(program)
+        assertThat(ryoLisp.repl("(area 2)"), is(12))
     }
 
     @Test

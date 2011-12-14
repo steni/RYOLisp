@@ -34,24 +34,29 @@ public class RYOLisp {
         } else if (!(x instanceof Collection)) {
             return x;
         } else if (x[0] == "set!") {
-            setVariable(x, env)
+            def (_, var, exp) = x
+            env.find(var)[var] = evaluate(exp, env)
         } else if (x[0] == "quote") {
             def (_, exp) = x
             return exp
         } else if (x[0] == "if") {
             def (_, test, conseq, alt) = x
             return evaluate( evaluate(test, env) ? conseq : alt , env)
+        } else if ( x[0] == "define") {
+            def (_, var, exp ) = x
+            env[var] = evaluate(exp, env)
+        } else if ( x[0] == "lambda") {
+            def (_, vars, exp) = x
+            println "lambda: vars: " + vars + ", exp: " + exp
+            return { args -> evaluate(exp, new Env(vars, args, env))}
+            //return new UserProcedure(vars, exp, env)
         } else {
             return runProcedure(x, env)
         }
     }
 
-    private def setVariable(Collection x, Env env) {
-        def (_, var, exp) = x
-        env.put(var, evaluate(exp, env))
-    }
-
     private def evaluateString(Env env, String x) {
+        println "evaluate string, find in env: " + x
         return env.find(x)[x]
     }
 
@@ -61,12 +66,16 @@ public class RYOLisp {
             expressions.add(evaluate(expression, env))
         }
         def procedure = expressions.pop()
-        return procedure(expressions.pop(), expressions.pop())
+        println "Running procedure " + procedure
+        println "Expressions: " + expressions
+        List arguments = new ArrayList(expressions)
+        return procedure(*arguments)
     }
 
     def addGlobals(Env env) {
         env.put("+", { a, b -> a + b })
         env.put("-", { a, b -> a - b })
+        env.put("*", { a, b -> a * b })
         env.put(">", { a, b -> a > b ? 1 : 0})
         env.put("<", { a, b -> a < b ? 1 : 0})
         return env

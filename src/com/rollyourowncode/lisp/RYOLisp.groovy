@@ -41,11 +41,11 @@ public class RYOLisp {
             return exp
         } else if (x[0] == "if") {
             def (_, test, conseq, alt) = x
-            return evaluate( evaluate(test, env) ? conseq : alt , env)
-        } else if ( x[0] == "define") {
-            def (_, var, exp ) = x
+            return evaluate(evaluate(test, env) ? conseq : alt, env)
+        } else if (x[0] == "define") {
+            def (_, var, exp) = x
             env[var] = evaluate(exp, env)
-        } else if ( x[0] == "lambda") {
+        } else if (x[0] == "lambda") {
             def (_, vars, exp) = x
             println "lambda: vars: " + vars + ", exp: " + exp
             return { Object[] args -> evaluate(exp, new Env(vars, args, env))}
@@ -65,10 +65,8 @@ public class RYOLisp {
             expressions.add(evaluate(expression, env))
         }
         def procedure = expressions.pop()
-        println "Running procedure " + procedure
-        println "Expressions: " + expressions
         List arguments = new ArrayList(expressions)
-        return procedure(*arguments)
+        return procedure(* arguments)
     }
 
     def addGlobals(Env env) {
@@ -77,6 +75,15 @@ public class RYOLisp {
         env.put("*", { a, b -> a * b })
         env.put(">", { a, b -> a > b ? 1 : 0})
         env.put("<", { a, b -> a < b ? 1 : 0})
+        env.put("<=", { a, b -> a <= b ? 1 : 0})
+        env.put(">=", { a, b -> a >= b ? 1 : 0})
+
+        env.put("car", { x -> x[0]})
+        env.put("cdr", { x -> x.size() > 1 ? x[1..-1] : x[0]}) // ugly with the special case
+
+        env.put("list", { Object[] x -> [*x]})
+
+        env.put("equal?", { a, b -> a == b ? 1 : 0})
         return env
     }
 

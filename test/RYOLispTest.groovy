@@ -219,5 +219,19 @@ public class RYOLispTest {
         assertThat(ryoLisp.repl("(+ 1 1)"), is(2))
     }
 
+    @Test
+    void factorialInLisp() {
+        def program = "(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))"
+        ryoLisp.repl(program)
+        assertThat(ryoLisp.repl("(fact 10)"), is(3628800))
+    }
+
+    @Test
+    void countInLisp1() {
+        ryoLisp.repl("(define first car)")
+        ryoLisp.repl("(define rest cdr)")
+        ryoLisp.repl("(define count (lambda (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
+        assertThat(ryoLisp.repl("(count 0 (list 0 1 2 3 0 0))"), is(3))
+    }
 
 }

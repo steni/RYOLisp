@@ -234,4 +234,11 @@ public class RYOLispTest {
         assertThat(ryoLisp.repl("(count 0 (list 0 1 2 3 0 0))"), is(3))
     }
 
+    @Test
+    void countInLisp2() {
+        ryoLisp.repl("(define first car)")
+        ryoLisp.repl("(define rest cdr)")
+        ryoLisp.repl("(define count (lambda (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
+        assertThat(ryoLisp.repl("(count (quote the) (quote (the more the merrier the bigger better)))"), is(3))
+    }
 }

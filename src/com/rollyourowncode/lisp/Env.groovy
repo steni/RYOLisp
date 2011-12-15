@@ -5,7 +5,8 @@ class Env extends HashMap {
 
     Env() {}
 
-    Env(List keys, List values, Env outer = null) {
+    Env(def keys, def values, Env outer = null) {
+        println "new Env(), keys: " + keys + ", values: " + values
         assert keys.size() == values.size()
         this.outer = outer
         for (int i = 0; i < keys.size(); i++) {
@@ -13,16 +14,10 @@ class Env extends HashMap {
         }
     }
 
-    Env(key, value, Env outer = null) {
-        println "new Env(), key: " + key + ", value: " + value
-        this.outer = outer
-        put(key.get(0), value)
-    }
-
     def find(var) {
         try {
             return tryToFind(var)
-        } catch ( NullPointerException npe ) {
+        } catch (NullPointerException npe) {
             println "Cannot find variable " + var
         }
 

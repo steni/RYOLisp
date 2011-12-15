@@ -48,8 +48,7 @@ public class RYOLisp {
         } else if ( x[0] == "lambda") {
             def (_, vars, exp) = x
             println "lambda: vars: " + vars + ", exp: " + exp
-            return { args -> evaluate(exp, new Env(vars, args, env))}
-            //return new UserProcedure(vars, exp, env)
+            return { Object[] args -> evaluate(exp, new Env(vars, args, env))}
         } else {
             return runProcedure(x, env)
         }

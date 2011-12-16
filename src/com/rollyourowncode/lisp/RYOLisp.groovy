@@ -78,8 +78,8 @@ public class RYOLisp {
         env.put("<=", { a, b -> a <= b ? 1 : 0})
         env.put(">=", { a, b -> a >= b ? 1 : 0})
 
-        env.put("car", { x -> x.head()})
-        env.put("cdr", { x -> x.tail()})
+        env.put("car", { it.head()})
+        env.put("cdr", { it.tail()})
 
         env.put("list", { Object[] x -> [*x]})
 

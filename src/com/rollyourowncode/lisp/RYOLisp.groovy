@@ -73,17 +73,22 @@ public class RYOLisp {
         env.put("+", { a, b -> a + b })
         env.put("-", { a, b -> a - b })
         env.put("*", { a, b -> a * b })
-        env.put(">", { a, b -> a > b ? 1 : 0})
-        env.put("<", { a, b -> a < b ? 1 : 0})
-        env.put("<=", { a, b -> a <= b ? 1 : 0})
-        env.put(">=", { a, b -> a >= b ? 1 : 0})
+        env.put(">", { a, b -> a > b ? 1 : 0 })
+        env.put("<", { a, b -> a < b ? 1 : 0 })
+        env.put("<=", { a, b -> a <= b ? 1 : 0 })
+        env.put(">=", { a, b -> a >= b ? 1 : 0 })
+        
+        env.put("not", { !it})
 
         env.put("car", { it.head()})
         env.put("cdr", { it.tail()})
 
         env.put("list", { Object[] x -> [*x]})
+        env.put("list?", { it instanceof List ? 1 : 0 })
 
-        env.put("equal?", { a, b -> a == b ? 1 : 0})
+        env.put("equal?", { a, b -> a == b ? 1 : 0 })
+
+        env.put("cons", { x, y -> [x] + y })
         return env
     }
 

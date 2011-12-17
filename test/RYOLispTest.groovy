@@ -136,6 +136,16 @@ public class RYOLispTest {
     }
 
     @Test
+    void quoteEmptyList() {
+        assertThat( ryoLisp.repl("(quote ())"), is([]))
+    }
+
+    @Test
+    void quoteListOfSymbols() {
+        assertThat( ryoLisp.repl("(quote (a b c))"), is(['a', 'b', 'c']))
+    }
+
+    @Test
     void greaterThan() {
         assertThat(ryoLisp.repl("(> 1 2)"), is(0))
         assertThat(ryoLisp.repl("(> 2 1)"), is(1))
@@ -145,6 +155,16 @@ public class RYOLispTest {
     void lessThan() {
         assertThat(ryoLisp.repl("(< 2 1)"), is(0))
         assertThat(ryoLisp.repl("(< 1 2)"), is(1))
+    }
+    
+    @Test 
+    void car() {
+        assertThat(ryoLisp.repl("(car (list 1 2 3))"), is(1))
+    }
+    
+    @Test
+    void cdr() {
+        assertThat(ryoLisp.repl("(cdr (list 1 2 3))"), is([2, 3]))
     }
 
     @Test
@@ -195,6 +215,11 @@ public class RYOLispTest {
     }
 
     @Test
+    void functionCall() {
+        assertThat( ryoLisp.repl("((lambda (r) (* 3 (* r r))) 2)"), is(12))
+    }
+
+    @Test
     void lambdaWithMoreArgs() {
         def program = "(lambda (a b) (* 3 (* a b)))"
         Object result = ryoLisp.repl(program)
@@ -212,6 +237,16 @@ public class RYOLispTest {
         def program = "(define area (lambda (r) (* 3 (* r r))))"
         ryoLisp.repl(program)
         assertThat(ryoLisp.repl("(area 2)"), is(12))
+    }
+    
+    @Test
+    void ryoList() {
+        assertThat(ryoLisp.repl("(list 0 1 2)"), is(([0, 1, 2])))
+    }
+    
+    @Test
+    void isList(){
+        assertThat(ryoLisp.repl("(list? (list 0 1 2))"), is(1))
     }
 
     @Test
@@ -240,5 +275,25 @@ public class RYOLispTest {
         ryoLisp.repl("(define rest cdr)")
         ryoLisp.repl("(define count (lambda (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
         assertThat(ryoLisp.repl("(count (quote the) (quote (the more the merrier the bigger better)))"), is(3))
+    }
+
+    @Test
+    void consNumberOntoEmptyList() {
+        assertThat( ryoLisp.repl("(cons 1 (quote()))"), is([1]))
+    }
+
+    @Test
+    void consNumberOntoListOfNumbers() {
+        assertThat( ryoLisp.repl("(cons 1 (list 2 3))"), is([1, 2, 3]))
+    }
+
+    @Test
+    void consSymbolOntoEmpyList() {
+        assertThat( ryoLisp.repl("(cons (quote a) (quote()))"), is(['a']))
+    }
+
+    @Test
+    void consSymbolOntoListOfSymbols() {
+        assertThat( ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))"), is(['a', 'b']))
     }
 }

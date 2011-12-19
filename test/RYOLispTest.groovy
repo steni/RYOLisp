@@ -85,10 +85,10 @@ public class RYOLispTest {
     }
 
     @Test
-    void eval() {
+    void evalRecognizesGlobalFunctions() {
         assertThat(ryoLisp.evaluate("+"), instanceOf(Closure.class))
     }
-
+    
     @Test
     void evalReturnsNumbersForNumbers() {
         assertThat(ryoLisp.evaluate(1), is(1))
@@ -127,6 +127,11 @@ public class RYOLispTest {
         def x = ['+', 1, 1]
         def result = ryoLisp.evaluate(x)
         assertThat(result, is(2))
+    }
+
+    @Test
+    void plusHandlesArbitraryNumberOfArguments() {
+        assertThat(ryoLisp.repl("(+ 2 3 4 5)"), is(14))
     }
 
     @Test

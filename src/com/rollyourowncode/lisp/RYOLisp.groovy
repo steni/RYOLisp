@@ -74,7 +74,7 @@ public class RYOLisp {
 
     def addGlobals(Env env) {
         env.putAll([
-                "+": { a, b -> a + b },
+                "+": { Object[] x -> x.sum() },
                 "-": { a, b -> a - b },
                 "*": { a, b -> a * b },
                 ">": { a, b -> a > b ? 1 : 0 },
@@ -92,7 +92,7 @@ public class RYOLisp {
 
                 "equal?": { a, b -> a == b ? 1 : 0 },
 
-                "cons": { x, y -> [x] + y } ])
+                "cons": { x, y -> [x] + y }])
         return env
     }
 

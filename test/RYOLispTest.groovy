@@ -296,4 +296,10 @@ public class RYOLispTest {
     void consSymbolOntoListOfSymbols() {
         assertThat( ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))"), is(['a', 'b']))
     }
+    
+    @Test
+    void evalInCode() {
+        ryoLisp.repl("(define program (list (quote +) 1 2))")
+        assertThat(ryoLisp.repl("(eval program)"), is(3))
+    }
 }

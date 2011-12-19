@@ -49,6 +49,9 @@ public class RYOLisp {
             def (_, vars, exp) = x
             println "lambda: vars: " + vars + ", exp: " + exp
             return { Object[] args -> evaluate(exp, new Env(vars, args, env))}
+        } else if (x[0] == "eval") {
+            def (_, form) = x
+            return evaluate(form, env)
         } else {
             return runProcedure(x, env)
         }
@@ -70,25 +73,26 @@ public class RYOLisp {
     }
 
     def addGlobals(Env env) {
-        env.put("+", { a, b -> a + b })
-        env.put("-", { a, b -> a - b })
-        env.put("*", { a, b -> a * b })
-        env.put(">", { a, b -> a > b ? 1 : 0 })
-        env.put("<", { a, b -> a < b ? 1 : 0 })
-        env.put("<=", { a, b -> a <= b ? 1 : 0 })
-        env.put(">=", { a, b -> a >= b ? 1 : 0 })
-        
-        env.put("not", { !it})
+        env.putAll([
+                "+": { a, b -> a + b },
+                "-": { a, b -> a - b },
+                "*": { a, b -> a * b },
+                ">": { a, b -> a > b ? 1 : 0 },
+                "<": { a, b -> a < b ? 1 : 0 },
+                "<=": { a, b -> a <= b ? 1 : 0 },
+                ">=": { a, b -> a >= b ? 1 : 0 },
 
-        env.put("car", { it.head()})
-        env.put("cdr", { it.tail()})
+                "not": { !it},
 
-        env.put("list", { Object[] x -> [*x]})
-        env.put("list?", { it instanceof List ? 1 : 0 })
+                "car": { it.head()},
+                "cdr": { it.tail()},
 
-        env.put("equal?", { a, b -> a == b ? 1 : 0 })
+                "list": { Object[] x -> [* x]},
+                "list?": { it instanceof List ? 1 : 0 },
 
-        env.put("cons", { x, y -> [x] + y })
+                "equal?": { a, b -> a == b ? 1 : 0 },
+
+                "cons": { x, y -> [x] + y } ])
         return env
     }
 

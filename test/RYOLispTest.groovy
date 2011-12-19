@@ -296,4 +296,16 @@ public class RYOLispTest {
     void consSymbolOntoListOfSymbols() {
         assertThat( ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))"), is(['a', 'b']))
     }
+
+    @Test
+    void beginEvaluatesFromLeftToRightAndReturnsLeftmostValue() {
+        def program = "(begin (define x 1) (define x (+ x 1)) (* x 2))"
+        assertThat( ryoLisp.parse(program), is(['begin', ['define', 'x', 1], ['define', 'x', ['+', 'x', 1]], ['*', 'x', 2]]))
+        assertThat( ryoLisp.repl(program), is(4))
+    }
+
+    @Test
+    void lexicalScoping() {
+        assertTrue(false)
+    }
 }

@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.*
 
 import org.junit.Test
 import org.junit.Before
-import org.junit.Ignore
 import static org.junit.Assert.assertTrue
 import org.junit.rules.ExpectedException
 
@@ -303,7 +302,7 @@ public class RYOLispTest {
     }
 
     @Test
-    void beginEvaluatesFromLeftToRightAndReturnsLeftmostValue() {
+    void beginEvaluatesFromLeftToRightAndReturnsRightmostValue() {
         def program = "(begin (define x 1) (define x (+ x 1)) (* x 2))"
         assertThat( ryoLisp.parse(program), is(['begin', ['define', 'x', 1], ['define', 'x', ['+', 'x', 1]], ['*', 'x', 2]]))
         assertThat( ryoLisp.repl(program), is(4))

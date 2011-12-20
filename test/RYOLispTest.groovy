@@ -310,8 +310,33 @@ public class RYOLispTest {
     }
 
     @Test
-    void lexicalScoping() {
-        assertTrue(false)
+    void closureEnclosesValues() {
+        def program = """(begin 
+                            (define a 2) 
+                            (define multiplyByA 
+                                (lambda (x) (* x a))
+                            )
+                            (multiplyByA 3)
+                         )"""
+        assertThat(ryoLisp.repl(program), is(6))
+    }
+
+    @Test
+    void lexicalScopingForLambdas() {
+        def program = """(begin
+                            (define a 2)
+                            (define multiplyByA
+                                (lambda (x)
+                                    (begin
+                                        (define a (* x a))
+                                        a
+                                    )
+                                )
+                            )                            
+                         )"""
+        ryoLisp.repl(program)
+        assertThat(ryoLisp.repl("(multiplyByA 3)"), is(6))
+        assertThat(ryoLisp.repl("a"), is(2))
     }
     
     @Test

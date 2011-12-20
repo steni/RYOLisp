@@ -85,10 +85,10 @@ public class RYOLispTest {
     }
 
     @Test
-    void eval() {
+    void evalRecognizesGlobalFunctions() {
         assertThat(ryoLisp.evaluate("+"), instanceOf(Closure.class))
     }
-
+    
     @Test
     void evalReturnsNumbersForNumbers() {
         assertThat(ryoLisp.evaluate(1), is(1))
@@ -127,6 +127,11 @@ public class RYOLispTest {
         def x = ['+', 1, 1]
         def result = ryoLisp.evaluate(x)
         assertThat(result, is(2))
+    }
+
+    @Test
+    void plusHandlesArbitraryNumberOfArguments() {
+        assertThat(ryoLisp.repl("(+ 2 3 4 5)"), is(14))
     }
 
     @Test
@@ -296,6 +301,7 @@ public class RYOLispTest {
     void consSymbolOntoListOfSymbols() {
         assertThat( ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))"), is(['a', 'b']))
     }
+<<<<<<< HEAD
 
     @Test
     void beginEvaluatesFromLeftToRightAndReturnsLeftmostValue() {
@@ -307,5 +313,11 @@ public class RYOLispTest {
     @Test
     void lexicalScoping() {
         assertTrue(false)
+    }
+    
+    @Test
+    void evalInCode() {
+        ryoLisp.repl("(define aListToEvaluateLater (list (quote +) 1 2))")
+        assertThat(ryoLisp.repl("(eval aListToEvaluateLater)"), is(3))
     }
 }

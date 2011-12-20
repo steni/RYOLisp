@@ -53,6 +53,9 @@ public class RYOLisp {
             def val
             x[1..-1].each { val = evaluate(it, env) }
             return val
+        } else if (x[0] == "eval") {
+            def (_, form) = x
+            return evaluate(evaluate(form, env))
         } else {
             return runProcedure(x, env)
         }

@@ -304,7 +304,7 @@ public class RYOLispTest {
     
     @Test
     void evalInCode() {
-        ryoLisp.repl("(define program (list (quote +) 1 2))")
-        assertThat(ryoLisp.repl("(eval program)"), is(3))
+        ryoLisp.repl("(define aListToEvaluateLater (list (quote +) 1 2))")
+        assertThat(ryoLisp.repl("(eval aListToEvaluateLater)"), is(3))
     }
 }

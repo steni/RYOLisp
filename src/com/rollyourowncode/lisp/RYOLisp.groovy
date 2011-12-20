@@ -51,7 +51,7 @@ public class RYOLisp {
             return { Object[] args -> evaluate(exp, new Env(vars, args, env))}
         } else if (x[0] == "eval") {
             def (_, form) = x
-            return evaluate(form, env)
+            return evaluate(evaluate(form, env))
         } else {
             return runProcedure(x, env)
         }

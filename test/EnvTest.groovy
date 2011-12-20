@@ -18,11 +18,4 @@ class EnvTest {
     void canGetValueBasedOnKey() {
         assertThat( env.get("key2"), is("value2") )
     }
-
-    @Test
-    void canGetValueBasedOnSymbolKey() {
-        assertThat( env.get(new Symbol(symbol:"key3")), is("value3"))
-
-    }
-
 }

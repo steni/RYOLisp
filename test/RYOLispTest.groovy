@@ -301,7 +301,6 @@ public class RYOLispTest {
     void consSymbolOntoListOfSymbols() {
         assertThat( ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))"), is(['a', 'b']))
     }
-<<<<<<< HEAD
 
     @Test
     void beginEvaluatesFromLeftToRightAndReturnsLeftmostValue() {

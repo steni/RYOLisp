@@ -1,327 +1,260 @@
 package com.rollyourowncode.lisp
 
-import static org.junit.Assert.assertThat
-import static org.hamcrest.CoreMatchers.*
-
-import org.junit.Test
-import org.junit.Before
-import static org.junit.Assert.assertTrue
-import org.junit.rules.ExpectedException
-
-public class RYOLispTest {
+class RYOLispTest extends GroovyTestCase {
     RYOLisp ryoLisp;
 
-    @Before
-    void setup() {
+    void setUp() {
         ryoLisp = new RYOLisp()
     }
 
-    @Test
-    void tokenize() {
-        String program = "(+ 1 1)"
-        ArrayDeque<String> tokens = ryoLisp.tokenize(program)
-        assertThat(tokens.size(), is(5))
-        assertThat(tokens.pop(), is("("))
-        assertThat(tokens.pop(), is("+"))
-        assertThat(tokens.pop(), is("1"))
-        assertThat(tokens.pop(), is("1"))
-        assertThat(tokens.pop(), is(")"))
+    void testTokenize() {
+        def tokens = ryoLisp.tokenize("(+ 1 1)")
+        assert tokens.size() == 5
+        assert tokens.pop() == "("
+        assert tokens.pop() == "+"
+        assert tokens.pop() == "1"
+        assert tokens.pop() == "1"
+        assert tokens.pop() == ")"
     }
 
-    @Test
-    void tokenizeProgram() {
-        String program = "(set! x*2 (* x 2))"
-        ArrayDeque<String> tokens = ryoLisp.tokenize(program)
-        assertThat(tokens.size(), is(9))
-        assertThat(tokens.pop(), is("("))
-        assertThat(tokens.pop(), is("set!"))
-        assertThat(tokens.pop(), is("x*2"))
-        assertThat(tokens.pop(), is("("))
-        assertThat(tokens.pop(), is("*"))
-        assertThat(tokens.pop(), is("x"))
-        assertThat(tokens.pop(), is("2"))
-        assertThat(tokens.pop(), is(")"))
-        assertThat(tokens.pop(), is(")"))
-
+    void testTokenizeProgram() {
+        def tokens = ryoLisp.tokenize("(set! x*2 (* x 2))")
+        assert tokens.size() == 9
+        assert tokens.pop() == "("
+        assert tokens.pop() == "set!"
+        assert tokens.pop() == "x*2"
+        assert tokens.pop() == "("
+        assert tokens.pop() == "*"
+        assert tokens.pop() == "x"
+        assert tokens.pop() == "2"
+        assert tokens.pop() == ")"
+        assert tokens.pop() == ")"
     }
 
-    @Test
-    void atomConvertsNumbersToNumbers() {
-        assertThat(ryoLisp.atom("1"), is(1))
-        assertThat(ryoLisp.atom("1.0"), is(1.0F))
+    void testAtomConvertsNumbersToNumbers() {
+        assert ryoLisp.atom("1") == 1
+        assert ryoLisp.atom("1.0") == 1.0F
     }
 
-    @Test
-    void atomConvertStringsToStrings() {
-        assertThat(ryoLisp.atom("+"), instanceOf(String.class))
-        assertTrue(ryoLisp.atom("+").equals("+"))
-        assertTrue(ryoLisp.atom("hei").equals("hei"))
+    void testAtomConvertStringsToStrings() {
+        assert ryoLisp.atom("+") instanceof String 
+        assert ryoLisp.atom("+") == "+"
+        assert ryoLisp.atom("hei") == "hei"
     }
 
-    @Test
-    public void readFromCreatesASimpleExpressionTree() {
-        String program = "(+ 1 1)"
-        ArrayDeque<String> tokens = ryoLisp.tokenize(program)
-        assertThat(ryoLisp.readFrom(tokens), is(['+', 1, 1]))
+    void testReadFromCreatesASimpleExpressionTree() {
+        def tokens = ryoLisp.tokenize("(+ 1 1)")
+        assert ryoLisp.readFrom(tokens) == ['+', 1, 1]
     }
 
-    @Test
-    public void readFromCreatesAnExpressionTree() {
-        String program = "(+ 1 (+ 1 1))"
-        ArrayDeque<String> tokens = ryoLisp.tokenize(program)
-        assertThat(ryoLisp.readFrom(tokens), is(['+', 1, ['+', 1, 1]]))
+    void testReadFromCreatesAnExpressionTree() {
+        def tokens = ryoLisp.tokenize("(+ 1 (+ 1 1))")
+        assert ryoLisp.readFrom(tokens) == ['+', 1, ['+', 1, 1]]
     }
 
-    @Test
-    void parse() {
-        String program = "(+ 1 1)"
-        assertThat(ryoLisp.parse(program), is(['+', 1, 1]))
+    void testparse() {
+        assert ryoLisp.parse("(+ 1 1)") == ['+', 1, 1]
     }
 
-    @Test
-    void parseHandlesEmptyLists() {
-        assertThat(ryoLisp.parse("()"), is([]))
+    void testParseHandlesEmptyLists() {
+        assert ryoLisp.parse("()") == []
     }
 
-    @Test
-    void evalRecognizesGlobalFunctions() {
-        assertThat(ryoLisp.evaluate("+"), instanceOf(Closure.class))
-    }
-    
-    @Test
-    void evalReturnsNumbersForNumbers() {
-        assertThat(ryoLisp.evaluate(1), is(1))
+    void testEvalRecognizesGlobalFunctions() {
+        assert ryoLisp.evaluate("+") instanceof Closure
     }
 
-    @Test(expected = NullPointerException.class)
-    void setFailsWithoutPrecedingDefine() {
-        def x = ['set!', 'a', 2]
-        ryoLisp.evaluate(x)
-        Map env = ryoLisp.outerEnv.find('a')
-        def value = env.get('a')
-        assertThat(value, is(2))
+    void testEvalReturnsNumbersForNumbers() {
+        assert ryoLisp.evaluate(1) == 1
     }
 
-    @Test
-    void evalAssignsValueOnSetThatIsStoredInTheEnvironment() {
+    void testSetFailsWithoutPrecedingDefine() {
+        shouldFail(NullPointerException) {
+            def x = ['set!', 'a', 2]
+            ryoLisp.evaluate(x)
+            def env = ryoLisp.outerEnv.find('a')
+            def value = env.get('a')
+            assert value == 2
+        }
+    }
+
+    void testEvalAssignsValueOnSetThatIsStoredInTheEnvironment() {
         def define = ['define', 'a', 3]
         ryoLisp.evaluate(define)
         def set = ['set!', 'a', 2]
         ryoLisp.evaluate(set)
-        Map env = ryoLisp.outerEnv.find('a')
+        def env = ryoLisp.outerEnv.find('a')
         def value = env.get('a')
-        assertThat(value, is(2))
+        assert value == 2
     }
 
-    @Test
-    void evalCanBringOutStoredVariableValues() {
+    void testEvalCanBringOutStoredVariableValues() {
         def x = ['define', 'a', 2]
         ryoLisp.evaluate(x)
-        assertThat(ryoLisp.evaluate('a'), is(2))
+        assert ryoLisp.evaluate('a') == 2
 
     }
 
-    @Test
-    void evalRunsFunctions() {
-        def x = ['+', 1, 1]
-        def result = ryoLisp.evaluate(x)
-        assertThat(result, is(2))
+    void testEvalRunsFunctions() {
+        def result = ryoLisp.evaluate(['+', 1, 1])
+        assert result == 2
     }
 
-    @Test
-    void plusHandlesArbitraryNumberOfArguments() {
-        assertThat(ryoLisp.repl("(+ 2 3 4 5)"), is(14))
+    void testPlusHandlesArbitraryNumberOfArguments() {
+        assert ryoLisp.repl("(+ 2 3 4 5)") == 14
     }
 
-    @Test
-    void quoteReturnsTheAtomOfTheExpression() {
-        assertThat(ryoLisp.repl("(quote hei)"), is("hei"))
-        assertThat(ryoLisp.repl("(quote 1)"), is(1))
+    void testQuoteReturnsTheAtomOfTheExpression() {
+        assert ryoLisp.repl("(quote hei)") == "hei"
+        assert ryoLisp.repl("(quote 1)") == 1
     }
 
-    @Test
-    void quoteEmptyList() {
-        assertThat( ryoLisp.repl("(quote ())"), is([]))
+    void testQuoteEmptyList() {
+        assert ryoLisp.repl("(quote ())") == []
     }
 
-    @Test
-    void quoteListOfSymbols() {
-        assertThat( ryoLisp.repl("(quote (a b c))"), is(['a', 'b', 'c']))
+    void testQuoteListOfSymbols() {
+        assert ryoLisp.repl("(quote (a b c))") == ['a', 'b', 'c']
     }
 
-    @Test
-    void greaterThan() {
-        assertThat(ryoLisp.repl("(> 1 2)"), is(0))
-        assertThat(ryoLisp.repl("(> 2 1)"), is(1))
+    void testGreaterThan() {
+        assert ryoLisp.repl("(> 1 2)") == 0
+        assert ryoLisp.repl("(> 2 1)") == 1
     }
 
-    @Test
-    void lessThan() {
-        assertThat(ryoLisp.repl("(< 2 1)"), is(0))
-        assertThat(ryoLisp.repl("(< 1 2)"), is(1))
-    }
-    
-    @Test 
-    void car() {
-        assertThat(ryoLisp.repl("(car (list 1 2 3))"), is(1))
-    }
-    
-    @Test
-    void cdr() {
-        assertThat(ryoLisp.repl("(cdr (list 1 2 3))"), is([2, 3]))
+    void testLessThan() {
+        assert ryoLisp.repl("(< 2 1)") == 0
+        assert ryoLisp.repl("(< 1 2)") == 1
     }
 
-    @Test
-    void parseIf() {
+    void testCar() {
+        assert ryoLisp.repl("(car (list 1 2 3))") == 1
+    }
+
+    void testCdr() {
+        assert ryoLisp.repl("(cdr (list 1 2 3))") == [2, 3]
+    }
+
+    void testParseIf() {
         String program = "(if (> 2 1) (quote 2isbiggethan1) (quote 2isnotbiggerthanone))"
-        assertThat(ryoLisp.parse(program), is(["if", [">", 2, 1], ["quote", "2isbiggethan1"], ["quote", "2isnotbiggerthanone"]]))
+        assert ryoLisp.parse(program) == ["if", [">", 2, 1], ["quote", "2isbiggethan1"], ["quote", "2isnotbiggerthanone"]]
     }
 
-    @Test
-    void branchingWithIf() {
-        String program1 = "(if 1 (quote true) (quote false))"
-        String program2 = "(if 0 (quote true) (quote false))"
-        assertThat(ryoLisp.repl(program1), is("true"))
-        assertThat(ryoLisp.repl(program2), is("false"))
+    void testBranchingWithIf() {
+        assert ryoLisp.repl("(if 1 (quote true) (quote false))") == "true"
+        assert ryoLisp.repl("(if 0 (quote true) (quote false))") == "false"
     }
 
-    @Test
-    void branchingWithIfEvaluatesTest() {
-        String program1 = "(if (> 2 1) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))"
-        String program2 = "(if (> 1 2) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))"
-        assertThat(ryoLisp.repl(program1), is("2isbiggerthan1"))
-        assertThat(ryoLisp.repl(program2), is("2isnotbiggerthanone"))
+    void testBranchingWithIfEvaluatesTest() {
+        assert ryoLisp.repl("(if (> 2 1) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))") == "2isbiggerthan1"
+        assert ryoLisp.repl("(if (> 1 2) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))") == "2isnotbiggerthanone"
     }
 
-    @Test
-    void defineAVariable() {
-        String program = "(define a 3)"
-        ryoLisp.repl(program)
-        assertThat(ryoLisp.repl("a"), is(3))
+    void testDefineAVariable() {
+        ryoLisp.repl("(define a 3)")
+        assert ryoLisp.repl("a") == 3
     }
 
-    @Test
-    void defineAVariableEvaluatesExpression() {
-        String program = "(define a (+ 1 3))"
-        ryoLisp.repl(program)
-        assertThat(ryoLisp.repl("a"), is(4))
+    void testDefineAVariableEvaluatesExpression() {
+        ryoLisp.repl("(define a (+ 1 3))")
+        assert ryoLisp.repl("a") == 4
     }
 
-    @Test
-    void lambda() {
+    void testLambda() {
         def program = "(lambda (r) (* 3 (* r r)))"
-        Object result = ryoLisp.repl(program)
-        assertThat(result, instanceOf(Closure.class))
+        def result = ryoLisp.repl(program)
+        assert result instanceof Closure
 
         Closure closure = result
         def number = closure(2)
-        assertThat(number, is(12))
+        assert number == 12
     }
 
-    @Test
-    void functionCall() {
-        assertThat( ryoLisp.repl("((lambda (r) (* 3 (* r r))) 2)"), is(12))
+    void testFunctionCall() {
+        assert ryoLisp.repl("((lambda (r) (* 3 (* r r))) 2)") == 12
     }
 
-    @Test
-    void lambdaWithMoreArgs() {
+    void testLambdaWithMoreArgs() {
         def program = "(lambda (a b) (* 3 (* a b)))"
-        Object result = ryoLisp.repl(program)
-        assertThat(result, instanceOf(Closure.class))
+        def result = ryoLisp.repl(program)
+        assert result instanceof Closure
 
         Closure closure = result
-
         def number = closure(3, 4)
-
-        assertThat(number, is(36))
+        assert number == 36
     }
 
-    @Test
-    void defineLambda() {
-        def program = "(define area (lambda (r) (* 3 (* r r))))"
-        ryoLisp.repl(program)
-        assertThat(ryoLisp.repl("(area 2)"), is(12))
-    }
-    
-    @Test
-    void ryoList() {
-        assertThat(ryoLisp.repl("(list 0 1 2)"), is(([0, 1, 2])))
-    }
-    
-    @Test
-    void isList(){
-        assertThat(ryoLisp.repl("(list? (list 0 1 2))"), is(1))
+    void testDefineLambda() {
+        ryoLisp.repl("(define area (lambda (r) (* 3 (* r r))))")
+        assert ryoLisp.repl("(area 2)") == 12
     }
 
-    @Test
-    void replCanAddInts() {
-        assertThat(ryoLisp.repl("(+ 1 1)"), is(2))
+    void testRyoList() {
+        assert ryoLisp.repl("(list 0 1 2)") == ([0, 1, 2])
     }
 
-    @Test
-    void factorialInLisp() {
+    void testIsList() {
+        assert ryoLisp.repl("(list? (list 0 1 2))") == 1
+    }
+
+    void testReplCanAddInts() {
+        assert ryoLisp.repl("(+ 1 1)") == 2
+    }
+
+    void testFactorialInLisp() {
         def program = "(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))"
         ryoLisp.repl(program)
-        assertThat(ryoLisp.repl("(fact 10)"), is(3628800))
+        assert ryoLisp.repl("(fact 10)") == 3628800
     }
 
-    @Test
-    void countInLisp1() {
+    void testCountInLisp1() {
         ryoLisp.repl("(define first car)")
         ryoLisp.repl("(define rest cdr)")
         ryoLisp.repl("(define count (lambda (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
-        assertThat(ryoLisp.repl("(count 0 (list 0 1 2 3 0 0))"), is(3))
+        assert ryoLisp.repl("(count 0 (list 0 1 2 3 0 0))") == 3
     }
 
-    @Test
-    void countInLisp2() {
+    void testCountInLisp2() {
         ryoLisp.repl("(define first car)")
         ryoLisp.repl("(define rest cdr)")
         ryoLisp.repl("(define count (lambda (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
-        assertThat(ryoLisp.repl("(count (quote the) (quote (the more the merrier the bigger better)))"), is(3))
+        assert ryoLisp.repl("(count (quote the) (quote (the more the merrier the bigger better)))") == 3
     }
 
-    @Test
-    void consNumberOntoEmptyList() {
-        assertThat( ryoLisp.repl("(cons 1 (quote()))"), is([1]))
+    void testConsNumberOntoEmptyList() {
+        assert ryoLisp.repl("(cons 1 (quote()))") == [1]
     }
 
-    @Test
-    void consNumberOntoListOfNumbers() {
-        assertThat( ryoLisp.repl("(cons 1 (list 2 3))"), is([1, 2, 3]))
+    void testConsNumberOntoListOfNumbers() {
+        assert ryoLisp.repl("(cons 1 (list 2 3))") == [1, 2, 3]
     }
 
-    @Test
-    void consSymbolOntoEmpyList() {
-        assertThat( ryoLisp.repl("(cons (quote a) (quote()))"), is(['a']))
+    void testConsSymbolOntoEmpyList() {
+        assert ryoLisp.repl("(cons (quote a) (quote()))") == ['a']
     }
 
-    @Test
-    void consSymbolOntoListOfSymbols() {
-        assertThat( ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))"), is(['a', 'b']))
+    void testConsSymbolOntoListOfSymbols() {
+        assert ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))") == ['a', 'b']
     }
 
-    @Test
-    void beginEvaluatesFromLeftToRightAndReturnsRightmostValue() {
+    void testBginEvaluatesFromLeftToRightAndReturnsRightmostValue() {
         def program = "(begin (define x 1) (define x (+ x 1)) (* x 2))"
-        assertThat( ryoLisp.parse(program), is(['begin', ['define', 'x', 1], ['define', 'x', ['+', 'x', 1]], ['*', 'x', 2]]))
-        assertThat( ryoLisp.repl(program), is(4))
+        assert ryoLisp.parse(program) == ['begin', ['define', 'x', 1], ['define', 'x', ['+', 'x', 1]], ['*', 'x', 2]]
+        assert ryoLisp.repl(program) == 4
     }
 
-    @Test
-    void closureEnclosesValues() {
-        def program = """(begin 
+    void testClosureEnclosesValues() {
+        def program = """(begin
                             (define a 2) 
                             (define multiplyByA 
                                 (lambda (x) (* x a))
                             )
                             (multiplyByA 3)
                          )"""
-        assertThat(ryoLisp.repl(program), is(6))
+        assert ryoLisp.repl(program) == 6
     }
 
-    @Test
-    void lexicalScopingForLambdas() {
+    void testLexicalScopingForLambdas() {
         def program = """(begin
                             (define a 2)
                             (define multiplyByA
@@ -334,13 +267,12 @@ public class RYOLispTest {
                             )                            
                          )"""
         ryoLisp.repl(program)
-        assertThat(ryoLisp.repl("(multiplyByA 3)"), is(6))
-        assertThat(ryoLisp.repl("a"), is(2))
+        assert ryoLisp.repl("(multiplyByA 3)") == 6
+        assert ryoLisp.repl("a") == 2
     }
-    
-    @Test
-    void evalInCode() {
+
+    void testEvalInCode() {
         ryoLisp.repl("(define aListToEvaluateLater (list (quote +) 1 2))")
-        assertThat(ryoLisp.repl("(eval aListToEvaluateLater)"), is(3))
+        assert ryoLisp.repl("(eval aListToEvaluateLater)") == 3
     }
 }

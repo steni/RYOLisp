@@ -1,49 +1,36 @@
 package com.rollyourowncode.lisp;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.*
-import static org.junit.Assert.assertThat;
-
-public class RYOMiniLispTest {
+class RYOMiniLispTest extends GroovyTestCase {
     RYOMiniLisp ryoLisp;
 
-    @Before
-    void setup() {
+    void setUp() {
         ryoLisp = new RYOMiniLisp()
     }
 
-    @Test
-    void tokenize() {
-        String program = "(+ 1 1)"
-        ArrayDeque<String> tokens = ryoLisp.tokenize(program)
-        assertThat(tokens.size(), is(5))
-        assertThat(tokens.pop(), is("("))
-        assertThat(tokens.pop(), is("+"))
-        assertThat(tokens.pop(), is("1"))
-        assertThat(tokens.pop(), is("1"))
-        assertThat(tokens.pop(), is(")"))
+    void testTokenize() {
+        def tokens = ryoLisp.tokenize("(+ 1 1)")
+
+        assert tokens.size() == 5
+        assert tokens.pop() == "("
+        assert tokens.pop() == "+"
+        assert tokens.pop() == "1"
+        assert tokens.pop() == "1"
+        assert tokens.pop() == ")"
     }
 
-    @Test
-    void parse() {
-        String program = "(+ 1 1)"
-        assertThat(ryoLisp.parse(program), is(['+', 1, 1]))
+    void testParse() {
+        assert ryoLisp.parse("(+ 1 1)") == ['+', 1, 1]
     }
 
-    @Test
-    void addTwoInts() {
-        assertThat(ryoLisp.repl("(+ 1 1)"), is(2))
+    void testAddTwoInts() {
+        assert ryoLisp.repl("(+ 1 1)") == 2
     }
 
-    @Test
-    void addThreeInts() {
-        assertThat(ryoLisp.repl("(+ 1 (+ 1 1))"), is(3))
+    void testAddThreeInts() {
+        assert ryoLisp.repl("(+ 1 (+ 1 1))") == 3
     }
-    
-    @Test 
-    void addThreeIntsInOneOperation() {
-        assertThat(ryoLisp.repl("(+ 1 1 1)"), is(3))
+
+    void testAddThreeIntsInOneOperation() {
+        assert ryoLisp.repl("(+ 1 1 1)") == 3
     }
 }

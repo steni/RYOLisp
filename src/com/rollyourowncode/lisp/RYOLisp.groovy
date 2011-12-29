@@ -45,7 +45,7 @@ public class RYOLisp {
         } else if (x[0] == "define") {
             def (_, var, exp) = x
             env[var] = evaluate(exp, env)
-        } else if (x[0] == "lambda") {
+        } else if (x[0] == "fn") {
             def (_, vars, exp) = x
             println "lambda: vars: " + vars + ", exp: " + exp
             return { Object[] args -> evaluate(exp, new Env(vars, args, env))}

@@ -37,7 +37,7 @@ class RYOLispTest extends GroovyTestCase {
     }
 
     void testAtomConvertStringsToStrings() {
-        assert ryoLisp.atom("+") instanceof String 
+        assert ryoLisp.atom("+") instanceof String
         assert ryoLisp.atom("+") == "+"
         assert ryoLisp.atom("hei") == "hei"
     }
@@ -160,8 +160,8 @@ class RYOLispTest extends GroovyTestCase {
         assert ryoLisp.repl("a") == 4
     }
 
-    void testLambda() {
-        def program = "(lambda (r) (* 3 (* r r)))"
+    void testfn() {
+        def program = "(fn (r) (* 3 (* r r)))"
         def result = ryoLisp.repl(program)
         assert result instanceof Closure
 
@@ -171,11 +171,11 @@ class RYOLispTest extends GroovyTestCase {
     }
 
     void testFunctionCall() {
-        assert ryoLisp.repl("((lambda (r) (* 3 (* r r))) 2)") == 12
+        assert ryoLisp.repl("((fn (r) (* 3 (* r r))) 2)") == 12
     }
 
-    void testLambdaWithMoreArgs() {
-        def program = "(lambda (a b) (* 3 (* a b)))"
+    void testfnWithMoreArgs() {
+        def program = "(fn (a b) (* 3 (* a b)))"
         def result = ryoLisp.repl(program)
         assert result instanceof Closure
 
@@ -184,8 +184,8 @@ class RYOLispTest extends GroovyTestCase {
         assert number == 36
     }
 
-    void testDefineLambda() {
-        ryoLisp.repl("(define area (lambda (r) (* 3 (* r r))))")
+    void testDefinefn() {
+        ryoLisp.repl("(define area (fn (r) (* 3 (* r r))))")
         assert ryoLisp.repl("(area 2)") == 12
     }
 
@@ -202,7 +202,7 @@ class RYOLispTest extends GroovyTestCase {
     }
 
     void testFactorialInLisp() {
-        def program = "(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))"
+        def program = "(define fact (fn (n) (if (<= n 1) 1 (* n (fact (- n 1))))))"
         ryoLisp.repl(program)
         assert ryoLisp.repl("(fact 10)") == 3628800
     }
@@ -210,14 +210,14 @@ class RYOLispTest extends GroovyTestCase {
     void testCountInLisp1() {
         ryoLisp.repl("(define first car)")
         ryoLisp.repl("(define rest cdr)")
-        ryoLisp.repl("(define count (lambda (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
+        ryoLisp.repl("(define count (fn (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
         assert ryoLisp.repl("(count 0 (list 0 1 2 3 0 0))") == 3
     }
 
     void testCountInLisp2() {
         ryoLisp.repl("(define first car)")
         ryoLisp.repl("(define rest cdr)")
-        ryoLisp.repl("(define count (lambda (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
+        ryoLisp.repl("(define count (fn (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
         assert ryoLisp.repl("(count (quote the) (quote (the more the merrier the bigger better)))") == 3
     }
 
@@ -237,7 +237,7 @@ class RYOLispTest extends GroovyTestCase {
         assert ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))") == ['a', 'b']
     }
 
-    void testBginEvaluatesFromLeftToRightAndReturnsRightmostValue() {
+    void testBeginEvaluatesFromLeftToRightAndReturnsRightmostValue() {
         def program = "(begin (define x 1) (define x (+ x 1)) (* x 2))"
         assert ryoLisp.parse(program) == ['begin', ['define', 'x', 1], ['define', 'x', ['+', 'x', 1]], ['*', 'x', 2]]
         assert ryoLisp.repl(program) == 4
@@ -247,18 +247,18 @@ class RYOLispTest extends GroovyTestCase {
         def program = """(begin
                             (define a 2) 
                             (define multiplyByA 
-                                (lambda (x) (* x a))
+                                (fn (x) (* x a))
                             )
                             (multiplyByA 3)
                          )"""
         assert ryoLisp.repl(program) == 6
     }
 
-    void testLexicalScopingForLambdas() {
+    void testLexicalScopingForfns() {
         def program = """(begin
                             (define a 2)
                             (define multiplyByA
-                                (lambda (x)
+                                (fn (x)
                                     (begin
                                         (define a (* x a))
                                         a
@@ -274,5 +274,17 @@ class RYOLispTest extends GroovyTestCase {
     void testEvalInCode() {
         ryoLisp.repl("(define aListToEvaluateLater (list (quote +) 1 2))")
         assert ryoLisp.repl("(eval aListToEvaluateLater)") == 3
+    }
+
+    void testClosureEnclosesValuesAndKeepsThem() {
+        def program = """(begin
+                            (define a 2)
+                            (define multiplyByA
+                                (fn (x) (* x a))
+                            )
+                            (set! a 3)
+                            (multiplyByA 3)
+                         )"""
+        assert ryoLisp.repl(program) == 6
     }
 }

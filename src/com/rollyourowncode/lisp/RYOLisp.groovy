@@ -110,16 +110,16 @@ class RYOLisp {
     }
 
     def readFrom(Deque<String> tokens) {
-        if (tokens.size() == 0) throw new Exception("unexpected EOF while reading")
+        if (!tokens) throw new Exception("unexpected EOF while reading")
         def token = tokens.pop() //[0]
-        if ('('.equals(token)) {
+        if (token == '(') {
             def L = []
             while (tokens.first != ')') {
-                L.add(readFrom(tokens))
+                L << readFrom(tokens)
             }
             tokens.pop() // pop off ')'
             return L
-        } else if (')'.equals(token)) {
+        } else if (token == ')') {
             throw new Exception("unexpected )")
         } else {
             return atom(token)

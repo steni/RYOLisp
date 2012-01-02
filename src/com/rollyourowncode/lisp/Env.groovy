@@ -1,7 +1,10 @@
 package com.rollyourowncode.lisp
 
-class Env extends HashMap {
+class Env {
     def outer
+
+	@Delegate
+	private Map map = [:]
 
     Env() {}
 

@@ -18,20 +18,8 @@ class Env {
     }
 
     def find(var) {
-        try {
-            return tryToFind(var)
-        } catch (NullPointerException npe) {
-            println "Cannot find variable $var"
-        }
-
+        containsKey(var) ? this : outer?.find(var)
     }
 
-    def tryToFind(var) {
-        if (containsKey(var)) {
-            return this
-        } else {
-            return outer.find(var)
-        }
-    }
 }
 

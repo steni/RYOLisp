@@ -1,34 +1,25 @@
 package com.rollyourowncode.lisp
 
-class Env extends HashMap {
+class Env {
     def outer
+
+    @Delegate
+    private Map map = [:]
 
     Env() {}
 
     Env(def keys, def values, Env outer = null) {
-        println "new Env(), keys: " + keys + ", values: " + values
+        println "new Env(), keys: $keys, values: $values"
         assert keys.size() == values.size()
         this.outer = outer
-        for (int i = 0; i < keys.size(); i++) {
-            put(keys[i], values[i])
+        keys.eachWithIndex { it, index ->
+            put(it, values[index])
         }
     }
 
     def find(var) {
-        try {
-            return tryToFind(var)
-        } catch (NullPointerException npe) {
-            println "Cannot find variable " + var
-        }
-
+        containsKey(var) ? this : outer?.find(var)
     }
 
-    def tryToFind(var) {
-        if (containsKey(var)) {
-            return this
-        } else {
-            return outer.find(var)
-        }
-    }
 }
 

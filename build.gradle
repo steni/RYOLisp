@@ -1,0 +1,13 @@
+apply plugin: 'groovy'
+
+sourceSets.main.groovy.srcDirs = ['src']
+sourceSets.test.groovy.srcDirs = ['test']
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    groovy 'org.codehaus.groovy:groovy:1.8.5'
+    testCompile 'junit:junit:4.10'
+}

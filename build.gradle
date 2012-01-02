@@ -1,0 +1,18 @@
+apply plugin: 'groovy'
+
+repositories {
+	mavenCentral()
+}
+
+sourceSets.main.groovy.srcDirs = ['src']
+sourceSets.test.groovy.srcDirs = ['test']
+
+dependencies {
+	groovy 'org.codehaus.groovy:groovy:1.8.5'
+	testCompile 'junit:junit:4.10'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.0-milestone-6'
+    jarFile = 'wrapper/wrapper.jar'
+}

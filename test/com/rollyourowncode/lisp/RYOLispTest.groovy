@@ -285,6 +285,6 @@ class RYOLispTest extends GroovyTestCase {
                             (set! a 3)
                             (multiplyByA 3)
                          )"""
-        assert ryoLisp.repl(program) == 6
+        assert ryoLisp.repl(program) == 9
     }
 }

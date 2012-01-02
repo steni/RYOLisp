@@ -12,8 +12,8 @@ class Env {
         println "new Env(), keys: $keys, values: $values"
         assert keys.size() == values.size()
         this.outer = outer
-        for (int i = 0; i < keys.size(); i++) {
-            put(keys[i], values[i])
+        keys.eachWithIndex { it, index ->
+            put(it, values[index])
         }
     }
 

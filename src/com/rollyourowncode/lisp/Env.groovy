@@ -3,8 +3,8 @@ package com.rollyourowncode.lisp
 class Env {
     def outer
 
-	@Delegate
-	private Map map = [:]
+    @Delegate
+    private Map map = [:]
 
     Env() {}
 

@@ -47,7 +47,7 @@ public class RYOLisp {
             env[var] = evaluate(exp, env)
         } else if (x[0] == "fn") {
             def (_, vars, exp) = x
-            println "lambda: vars: " + vars + ", exp: " + exp
+            println "lambda: vars: $vars, exp: $exp"
             return { Object[] args -> evaluate(exp, new Env(vars, args, env))}
         } else if (x[0] == "begin") {
             def val
@@ -62,7 +62,7 @@ public class RYOLisp {
     }
 
     private def evaluateString(Env env, String x) {
-        println "evaluate string, find in env: " + x
+        println "evaluate string, find in env: $x"
         return env.find(x)[x]
     }
 

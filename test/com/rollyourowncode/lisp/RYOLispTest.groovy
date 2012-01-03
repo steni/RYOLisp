@@ -276,6 +276,7 @@ class RYOLispTest extends GroovyTestCase {
         assert ryoLisp.repl("(eval aListToEvaluateLater)") == 3
     }
 
+    // fails because closures are not working properly
     void testClosureEnclosesValuesAndKeepsThem() {
         def program = """(begin
                             (define a 2)
@@ -285,6 +286,6 @@ class RYOLispTest extends GroovyTestCase {
                             (set! a 3)
                             (multiplyByA 3)
                          )"""
-        assert ryoLisp.repl(program) == 9
+        assert ryoLisp.repl(program) == 6
     }
 }

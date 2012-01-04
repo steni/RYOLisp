@@ -1,4 +1,7 @@
 apply plugin: 'groovy'
+apply plugin: 'application'
+
+mainClassName = "com.rollyourowncode.lisp.RYOLisp"
 
 repositories {
 	mavenCentral()

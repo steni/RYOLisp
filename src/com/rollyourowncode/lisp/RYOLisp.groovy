@@ -7,7 +7,16 @@ public class RYOLisp {
 
     static void main(args) {
         RYOLisp ryoLisp = new RYOLisp()
-        ryoLisp.repl()
+        run(ryoLisp)
+    }
+
+    private static run(RYOLisp ryoLisp) {
+        try {
+            ryoLisp.repl()
+        } catch (Exception e) {
+            println e.message
+            run(ryoLisp)
+        }
     }
 
     RYOLisp() {
@@ -65,6 +74,11 @@ public class RYOLisp {
                 println "lambda: vars: " + vars + ", exp: " + exp
                 return { Object[] args -> evaluate(exp, new Env(vars, args, env))}
             case "begin":
+                /*
+                     def val
+                     x[1..-1].each { val = evaluate(it, env) }
+                     return val
+                 */
                 return x[1..-1].collect {evaluate(it, env)}.last()
             case "eval":
                 def (_, form) = x

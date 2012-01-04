@@ -44,12 +44,12 @@ class RYOLispTest extends GroovyTestCase {
 
     void testReadFromCreatesASimpleExpressionTree() {
         def tokens = ryoLisp.tokenize("(+ 1 1)")
-        assert ryoLisp.readFrom(tokens) == ['+', 1, 1]
+        assert ryoLisp.treeify(tokens) == ['+', 1, 1]
     }
 
     void testReadFromCreatesAnExpressionTree() {
         def tokens = ryoLisp.tokenize("(+ 1 (+ 1 1))")
-        assert ryoLisp.readFrom(tokens) == ['+', 1, ['+', 1, 1]]
+        assert ryoLisp.treeify(tokens) == ['+', 1, ['+', 1, 1]]
     }
 
     void testparse() {
@@ -101,38 +101,38 @@ class RYOLispTest extends GroovyTestCase {
     }
 
     void testPlusHandlesArbitraryNumberOfArguments() {
-        assert ryoLisp.repl("(+ 2 3 4 5)") == 14
+        assert ryoLisp.interpret("(+ 2 3 4 5)") == 14
     }
 
     void testQuoteReturnsTheAtomOfTheExpression() {
-        assert ryoLisp.repl("(quote hei)") == "hei"
-        assert ryoLisp.repl("(quote 1)") == 1
+        assert ryoLisp.interpret("(quote hei)") == "hei"
+        assert ryoLisp.interpret("(quote 1)") == 1
     }
 
     void testQuoteEmptyList() {
-        assert ryoLisp.repl("(quote ())") == []
+        assert ryoLisp.interpret("(quote ())") == []
     }
 
     void testQuoteListOfSymbols() {
-        assert ryoLisp.repl("(quote (a b c))") == ['a', 'b', 'c']
+        assert ryoLisp.interpret("(quote (a b c))") == ['a', 'b', 'c']
     }
 
     void testGreaterThan() {
-        assert ryoLisp.repl("(> 1 2)") == 0
-        assert ryoLisp.repl("(> 2 1)") == 1
+        assert ryoLisp.interpret("(> 1 2)") == 0
+        assert ryoLisp.interpret("(> 2 1)") == 1
     }
 
     void testLessThan() {
-        assert ryoLisp.repl("(< 2 1)") == 0
-        assert ryoLisp.repl("(< 1 2)") == 1
+        assert ryoLisp.interpret("(< 2 1)") == 0
+        assert ryoLisp.interpret("(< 1 2)") == 1
     }
 
     void testCar() {
-        assert ryoLisp.repl("(car (list 1 2 3))") == 1
+        assert ryoLisp.interpret("(car (list 1 2 3))") == 1
     }
 
     void testCdr() {
-        assert ryoLisp.repl("(cdr (list 1 2 3))") == [2, 3]
+        assert ryoLisp.interpret("(cdr (list 1 2 3))") == [2, 3]
     }
 
     void testParseIf() {
@@ -141,28 +141,28 @@ class RYOLispTest extends GroovyTestCase {
     }
 
     void testBranchingWithIf() {
-        assert ryoLisp.repl("(if 1 (quote true) (quote false))") == "true"
-        assert ryoLisp.repl("(if 0 (quote true) (quote false))") == "false"
+        assert ryoLisp.interpret("(if 1 (quote true) (quote false))") == "true"
+        assert ryoLisp.interpret("(if 0 (quote true) (quote false))") == "false"
     }
 
     void testBranchingWithIfEvaluatesTest() {
-        assert ryoLisp.repl("(if (> 2 1) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))") == "2isbiggerthan1"
-        assert ryoLisp.repl("(if (> 1 2) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))") == "2isnotbiggerthanone"
+        assert ryoLisp.interpret("(if (> 2 1) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))") == "2isbiggerthan1"
+        assert ryoLisp.interpret("(if (> 1 2) (quote 2isbiggerthan1) (quote 2isnotbiggerthanone))") == "2isnotbiggerthanone"
     }
 
     void testDefineAVariable() {
-        ryoLisp.repl("(define a 3)")
-        assert ryoLisp.repl("a") == 3
+        ryoLisp.interpret("(define a 3)")
+        assert ryoLisp.interpret("a") == 3
     }
 
     void testDefineAVariableEvaluatesExpression() {
-        ryoLisp.repl("(define a (+ 1 3))")
-        assert ryoLisp.repl("a") == 4
+        ryoLisp.interpret("(define a (+ 1 3))")
+        assert ryoLisp.interpret("a") == 4
     }
 
     void testfn() {
         def program = "(fn (r) (* 3 (* r r)))"
-        def result = ryoLisp.repl(program)
+        def result = ryoLisp.interpret(program)
         assert result instanceof Closure
 
         Closure closure = result
@@ -171,12 +171,12 @@ class RYOLispTest extends GroovyTestCase {
     }
 
     void testFunctionCall() {
-        assert ryoLisp.repl("((fn (r) (* 3 (* r r))) 2)") == 12
+        assert ryoLisp.interpret("((fn (r) (* 3 (* r r))) 2)") == 12
     }
 
     void testfnWithMoreArgs() {
         def program = "(fn (a b) (* 3 (* a b)))"
-        def result = ryoLisp.repl(program)
+        def result = ryoLisp.interpret(program)
         assert result instanceof Closure
 
         Closure closure = result
@@ -185,62 +185,62 @@ class RYOLispTest extends GroovyTestCase {
     }
 
     void testDefinefn() {
-        ryoLisp.repl("(define area (fn (r) (* 3 (* r r))))")
-        assert ryoLisp.repl("(area 2)") == 12
+        ryoLisp.interpret("(define area (fn (r) (* 3 (* r r))))")
+        assert ryoLisp.interpret("(area 2)") == 12
     }
 
     void testRyoList() {
-        assert ryoLisp.repl("(list 0 1 2)") == ([0, 1, 2])
+        assert ryoLisp.interpret("(list 0 1 2)") == ([0, 1, 2])
     }
 
     void testIsList() {
-        assert ryoLisp.repl("(list? (list 0 1 2))") == 1
+        assert ryoLisp.interpret("(list? (list 0 1 2))") == 1
     }
 
     void testReplCanAddInts() {
-        assert ryoLisp.repl("(+ 1 1)") == 2
+        assert ryoLisp.interpret("(+ 1 1)") == 2
     }
 
     void testFactorialInLisp() {
         def program = "(define fact (fn (n) (if (<= n 1) 1 (* n (fact (- n 1))))))"
-        ryoLisp.repl(program)
-        assert ryoLisp.repl("(fact 10)") == 3628800
+        ryoLisp.interpret(program)
+        assert ryoLisp.interpret("(fact 10)") == 3628800
     }
 
     void testCountInLisp1() {
-        ryoLisp.repl("(define first car)")
-        ryoLisp.repl("(define rest cdr)")
-        ryoLisp.repl("(define count (fn (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
-        assert ryoLisp.repl("(count 0 (list 0 1 2 3 0 0))") == 3
+        ryoLisp.interpret("(define first car)")
+        ryoLisp.interpret("(define rest cdr)")
+        ryoLisp.interpret("(define count (fn (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
+        assert ryoLisp.interpret("(count 0 (list 0 1 2 3 0 0))") == 3
     }
 
     void testCountInLisp2() {
-        ryoLisp.repl("(define first car)")
-        ryoLisp.repl("(define rest cdr)")
-        ryoLisp.repl("(define count (fn (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
-        assert ryoLisp.repl("(count (quote the) (quote (the more the merrier the bigger better)))") == 3
+        ryoLisp.interpret("(define first car)")
+        ryoLisp.interpret("(define rest cdr)")
+        ryoLisp.interpret("(define count (fn (item L) (if L (+ (equal? item (first L)) (count item (rest L))) 0)))")
+        assert ryoLisp.interpret("(count (quote the) (quote (the more the merrier the bigger better)))") == 3
     }
 
     void testConsNumberOntoEmptyList() {
-        assert ryoLisp.repl("(cons 1 (quote()))") == [1]
+        assert ryoLisp.interpret("(cons 1 (quote()))") == [1]
     }
 
     void testConsNumberOntoListOfNumbers() {
-        assert ryoLisp.repl("(cons 1 (list 2 3))") == [1, 2, 3]
+        assert ryoLisp.interpret("(cons 1 (list 2 3))") == [1, 2, 3]
     }
 
     void testConsSymbolOntoEmpyList() {
-        assert ryoLisp.repl("(cons (quote a) (quote()))") == ['a']
+        assert ryoLisp.interpret("(cons (quote a) (quote()))") == ['a']
     }
 
     void testConsSymbolOntoListOfSymbols() {
-        assert ryoLisp.repl("(cons (quote a) (cons (quote b) (quote())))") == ['a', 'b']
+        assert ryoLisp.interpret("(cons (quote a) (cons (quote b) (quote())))") == ['a', 'b']
     }
 
     void testBeginEvaluatesFromLeftToRightAndReturnsRightmostValue() {
         def program = "(begin (define x 1) (define x (+ x 1)) (* x 2))"
         assert ryoLisp.parse(program) == ['begin', ['define', 'x', 1], ['define', 'x', ['+', 'x', 1]], ['*', 'x', 2]]
-        assert ryoLisp.repl(program) == 4
+        assert ryoLisp.interpret(program) == 4
     }
 
     void testClosureEnclosesValues() {
@@ -251,7 +251,7 @@ class RYOLispTest extends GroovyTestCase {
                             )
                             (multiplyByA 3)
                          )"""
-        assert ryoLisp.repl(program) == 6
+        assert ryoLisp.interpret(program) == 6
     }
 
     void testLexicalScopingForfns() {
@@ -266,14 +266,14 @@ class RYOLispTest extends GroovyTestCase {
                                 )
                             )                            
                          )"""
-        ryoLisp.repl(program)
-        assert ryoLisp.repl("(multiplyByA 3)") == 6
-        assert ryoLisp.repl("a") == 2
+        ryoLisp.interpret(program)
+        assert ryoLisp.interpret("(multiplyByA 3)") == 6
+        assert ryoLisp.interpret("a") == 2
     }
 
     void testEvalInCode() {
-        ryoLisp.repl("(define aListToEvaluateLater (list (quote +) 1 2))")
-        assert ryoLisp.repl("(eval aListToEvaluateLater)") == 3
+        ryoLisp.interpret("(define aListToEvaluateLater (list (quote +) 1 2))")
+        assert ryoLisp.interpret("(eval aListToEvaluateLater)") == 3
     }
 
     // fails because closures are not working properly
@@ -286,6 +286,6 @@ class RYOLispTest extends GroovyTestCase {
                             (set! a 3)
                             (multiplyByA 3)
                          )"""
-        assert ryoLisp.repl(program) == 6
+        assert ryoLisp.interpret(program) == 6
     }
 }

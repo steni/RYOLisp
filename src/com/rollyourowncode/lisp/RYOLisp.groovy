@@ -1,30 +1,32 @@
 package com.rollyourowncode.lisp
 
+import static java.lang.System.exit
+
 public class RYOLisp {
     Env outerEnv
 
     static void main(args) {
         RYOLisp ryoLisp = new RYOLisp()
-        ryoLisp.interactive()
+        ryoLisp.repl()
     }
 
     RYOLisp() {
         outerEnv = addGlobals(new Env())
     }
-
-    def interactive() {
-        print "repl >> "
-        System.in.eachLine() { line ->
-            if (!line.equals("exit")) {
-                println(repl(line))
-                print "repl >> "
-            } else {
-                System.exit(0)
-            }
-        }
+    
+    def repl() {
+        while ( true ) println(evaluate(parse(read())))
     }
 
-    def repl(s) {
+    def read() {
+        print "repl >> "
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
+        def source = br.readLine()
+        if ( source == "exit" ) exit(0)
+        return source;
+    }
+
+    def interpret(s) {
         return evaluate(parse(s))
     }
 
@@ -110,16 +112,16 @@ public class RYOLisp {
     }
 
     def parse(s) {
-        return readFrom(tokenize(s))
+        return treeify(tokenize(s))
     }
 
-    def readFrom(Deque<String> tokens) {
+    def treeify(Deque<String> tokens) {
         if (!tokens) throw new Exception("unexpected EOF while reading")
         def token = tokens.pop() //[0]
         if (token == '(') {
             def L = []
             while (tokens.first != ')') {
-                L << readFrom(tokens)
+                L << treeify(tokens)
             }
             tokens.pop() // pop off ')'
             return L

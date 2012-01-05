@@ -32,7 +32,7 @@ public class RYOLisp {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
         def source = br.readLine()
         if ( source == "exit" ) exit(0)
-        return source;
+        return source
     }
 
     def interpret(s) {
@@ -46,7 +46,7 @@ public class RYOLisp {
             case Collection:
                 return evaluateCollection(env, x)
             default:
-                return x;
+                return x
         }
     }
 
